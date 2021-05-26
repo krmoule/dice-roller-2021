@@ -49,7 +49,8 @@ def fetch_character_mapping():
         data = result.get('values', [])
         character_mapping = {}
         for d in data:
-            character_mapping[d[0]] = d[1]
+            if d:
+                character_mapping[d[0]] = d[1]
 
 
 def fetch_skills(character, column, max_row):
