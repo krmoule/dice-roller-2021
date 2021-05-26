@@ -11,6 +11,12 @@ import sheets
 
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
 
+def find_options(options, name, def_value):
+    for o in options:
+        if o['name'] == name:
+            return type(def_vaule)(o['value'])
+    return def_value
+
 def interactions(request):
     signature = request.headers.get('X-Signature-Ed25519')
     timestamp = request.headers.get('X-Signature-Timestamp')
@@ -28,9 +34,10 @@ def interactions(request):
         token = request.json['token']
         user = request.json['member']['user']['username']
         skill = request.json['data']['name']
-        bonus = request.json['data']['bonus']
-        penalty = request.json['data']['penalty']
-        advancement = request.json['data']['advancement']
+        options = request.json['data']['options']
+        bonus = find_options(options, 'bonus', False)
+        penalty = find_options(options, 'penalty', False)
+        advancement = find_options(options, 'advancement', False)
         message = {
             'token': token,
             'user': user,
