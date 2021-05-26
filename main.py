@@ -4,9 +4,10 @@ from flask import jsonify
 
 from discord_interactions import verify_key, InteractionType, InteractionResponseType
 
-import sheets
-import pubsub
+import cthulu
 import discord
+import pubsub
+import sheets
 
 CLIENT_PUBLIC_KEY = os.getenv('CLIENT_PUBLIC_KEY')
 
@@ -27,10 +28,16 @@ def interactions(request):
         token = request.json['token']
         user = request.json['member']['user']['username']
         skill = request.json['data']['name']
+        bonus = request.json['data']['bonus']
+        penalty = request.json['data']['penalty']
+        advancement = request.json['data']['advancement']
         message = {
             'token': token,
             'user': user,
             'skill': skill,
+            'bonus': bonus,
+            'penalty': penalty,
+            'advancement': advancement,
         }
         pubsub.send_deferred(message)
         # Notify discord of the deferral
@@ -45,10 +52,23 @@ def interactions(request):
 def discord_deferred(event, context):
     print(f'This Function was triggered by messageId {context.event_id} published at {context.timestamp} to {context.resource["name"]}')
     message = pubsub.decode(event['data'])
-    print(f'rolling - {message["skill"]} for {message["user"]}')
-    result = sheets.fetch_value(message['user'], message['skill'])
-    content = {
-        'tts': False,
-        'embeds': [result]
-    }
-    discord.edit_interaction(message['token'], content)
+    user = message['user']
+    skill = message['skill']
+    bonus = message['bonus']
+    penalty = message['penalty']
+    advancement = message['advancement']
+    print(f'rolling - {skill} for {user}')
+
+    value, error = sheets.fetch_value(user, skill)
+    if not error is None:
+        content = {
+            'tts': False,
+            'embeds': [discord.embed(0xff0000, 'Oops!', error)]
+        }
+        discord.edit_interaction(message['token'], content)
+    else:
+        content = {
+            'tts': False,
+            'embeds': [cthulu.roll(user, skill, value, bonus, penalty, advancement)]
+        }
+        discord.edit_interaction(message['token'], content)
