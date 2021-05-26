@@ -65,7 +65,8 @@ def ResolveDice(BonusDie, PenaltyDie, Threshold):
     return ret
 
 def roll(user, skill, value, bonus, penalty, advancement):
-    return discord.embed(COL_NORM_SUCCESS, 'Success!', 'Roll PH')
+    desc = f'Roll PH {user} {skill} {value} {bonus} {penalty} {advancement}'
+    return discord.embed(COL_NORM_SUCCESS, 'Success!', desc)
 
 def main():
     r = roll('user1', 'skill1', 5, True, False, True)
