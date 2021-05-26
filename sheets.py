@@ -7,24 +7,21 @@ from google.oauth2 import service_account
 
 import schema
 
+
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
+
 
 creds = None
 service = None
 spreadsheets = None
+
 
 # mapping of discord user -> character sheet
 character_mapping = None
 # mapping of character -> command -> row
 skill_mapping = {}
 
-COL_CRIT_SUCCESS=0xFFFFFF
-COL_EXTR_SUCCESS=0xf1c40f
-COL_HARD_SUCCESS=0x2ecc71
-COL_NORM_SUCCESS=0x2e71cc
-COL_NORM_FAILURE=0xe74c3c
-COL_CRIT_FAILURE=0x992d22
 
 def init():
     global creds, service, spreadsheets
@@ -83,14 +80,8 @@ def fetch_row(sheet, row, column):
     return result.get('values', [])
 
 
-def embed(colour, title, description):
-    return {
-        'color': colour,
-        'title': title,
-        'description': description,
-    }
-
-
+# Return a tuple (value, error) where value is the user's skill value if error is None,
+# otherwise value is undefined and error contains the failure.
 def fetch_value(user, skill):
     global character_mapping
     init()
@@ -105,15 +96,15 @@ def fetch_value(user, skill):
                 [v] = fetch_row(character, row, column)
                 if schema.mapping[v[0]]!= skill:
                     del skill_mapping[character]
-                    return embed(COL_CRIT_FAILURE, 'Oops!', f"{character}'s character sheet is messed up! ¯\_(ツ)_/¯")
-                return embed(COL_NORM_SUCCESS, 'Success!', f'Asked for {skill} - found {v[0]} with {v[1]}')
+                    return 0, f"{character}'s character sheet is messed up! ¯\_(ツ)_/¯"
+                return v[1], None
             else:
-                return embed(COL_CRIT_FAILURE, 'Oops!', f"{character} is unskilled in {skill}")
+                return 0, f"{character} is unskilled in {skill}"
         else:
-            return embed(COL_CRIT_FAILURE, 'Oops!', f"{character}'s character sheet is messed up!  (╯°□°）╯︵ ┻━┻")
+            return 0, f"{character}'s character sheet is messed up!  (╯°□°）╯︵ ┻━┻"
     else:
         character_mapping = None
-        return embed(COL_CRIT_FAILURE, 'Oops!', f"{user} doesn't have a character, time to roll one up!")
+        return 0, f"{user} doesn't have a character, time to roll one up!"
 
 
 def main():
@@ -121,13 +112,15 @@ def main():
     init_local()    
     def t(f):
         start = time.time();
-        r = f()
+        v, e = f()
         end = time.time();
-        print(f'{end-start} -> {r}')        
+        print(f'{end-start} -> {v}, {e}')        
     t(lambda: fetch_value('user1', 'listen'))
     t(lambda: fetch_value('user1', 'ride'))
     t(lambda: fetch_value('user2', 'ride'))
     t(lambda: fetch_value('user 3', 'listen'))
+    t(lambda: fetch_value('user 3', 'listen3'))
+    t(lambda: fetch_value('user 33', 'listen'))
 
 
 if __name__ == '__main__':
