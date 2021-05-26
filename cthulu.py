@@ -1,9 +1,10 @@
 '''
 This is heavily inspired by https://github.com/rtkdannable/dorian/blob/master/dorian.py
 '''
-import discord
-
 from random import randint
+
+import discord
+import sheets
 
 COL_CRIT_SUCCESS=0xFFFFFF
 COL_EXTR_SUCCESS=0xf1c40f
@@ -64,12 +65,12 @@ def ResolveDice(BonusDie, PenaltyDie, Threshold):
     ret = desc
     return ret
 
-def roll(user, skill, value, bonus, penalty, advancement):
-    desc = f'Roll PH {user} {skill} {value} {bonus} {penalty} {advancement}'
+def roll(value, bonus, penalty, advancement):
+    desc = f'Roll PH {value.character} {value.skill} {value.value} {bonus} {penalty} {advancement}'
     return discord.embed(COL_NORM_SUCCESS, 'Success!', desc)
 
 def main():
-    r = roll('user1', 'skill1', 5, True, False, True)
+    r = roll(sheets.Value('character1', 'skill1', 5), True, False, True)
     print(r)
 
 if __name__ == '__main__':

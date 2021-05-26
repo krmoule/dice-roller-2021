@@ -76,6 +76,8 @@ def discord_deferred(event, context):
     else:
         content = {
             'tts': False,
-            'embeds': [cthulu.roll(user, skill, value, bonus, penalty, advancement)]
+            'embeds': [
+                cthulu.roll(value, bonus, penalty, advancement)
+            ]
         }
         discord.edit_interaction(message['token'], content)
