@@ -83,7 +83,7 @@ def fetch_row(sheet, row, column):
 
 Value = collections.namedtuple(
     'Value',
-    ['character', 'skill', 'value'],
+    ['character', 'skill', 'threshold'],
     defaults=['', '', 0])
 
 # Return a tuple (value, error) where value is the user's skill value if error is None,
