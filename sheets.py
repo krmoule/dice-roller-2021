@@ -1,4 +1,5 @@
 import os 
+import collections
 
 import google.auth
 from googleapiclient.discovery import build
@@ -80,6 +81,10 @@ def fetch_row(sheet, row, column):
     result = spreadsheets.values().get(spreadsheetId=SPREADSHEET_ID, range=f'{sheet}!{column}{row}:{next_column}{row}').execute()
     return result.get('values', [])
 
+Value = collections.namedtuple(
+    'Value',
+    ['character', 'skill', 'value'],
+    defaults=['', '', 0])
 
 # Return a tuple (value, error) where value is the user's skill value if error is None,
 # otherwise value is undefined and error contains the failure.
@@ -97,15 +102,15 @@ def fetch_value(user, skill):
                 [v] = fetch_row(character, row, column)
                 if schema.mapping[v[0]]!= skill:
                     del skill_mapping[character]
-                    return 0, f"{character}'s character sheet is messed up! ¯\_(ツ)_/¯"
-                return v[1], None
+                    return Value(), f"{character}'s character sheet is messed up! ¯\_(ツ)_/¯"
+                return Value(character, v[0], v[1]), None
             else:
-                return 0, f"{character} is unskilled in {skill}"
+                return Value(), f'{character} is unskilled in {skill}'
         else:
-            return 0, f"{character}'s character sheet is messed up!  (╯°□°）╯︵ ┻━┻"
+            return Value(), f"{character}'s character sheet is messed up!  (╯°□°）╯︵ ┻━┻"
     else:
         character_mapping = None
-        return 0, f"{user} doesn't have a character, time to roll one up!"
+        return Value(), f"{user} doesn't have a character, time to roll one up!"
 
 
 def main():
