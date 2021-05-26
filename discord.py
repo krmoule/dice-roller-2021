@@ -13,7 +13,8 @@ def edit_interaction(token, content):
     r = requests.patch(url, json=content)
     print(r)
     print(r.json())
-    
+
+
 # https://discord.com/developers/docs/interactions/slash-commands#create-guild-application-command
 def create_guild_command(guild_id, command, headers=None):
     while True:
@@ -26,3 +27,13 @@ def create_guild_command(guild_id, command, headers=None):
             time.sleep(json['retry_after'])
         else:
             return r.status_code
+
+
+# Return an embed element using |colour|, |title| and |description|
+# https://discord.com/developers/docs/resources/channel#embed-object
+def embed(colour, title, description):
+    return {
+        'color': colour,
+        'title': title,
+        'description': description,
+    }
